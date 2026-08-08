@@ -28,7 +28,7 @@
                 <StackPanel Spacing="8">
                     <TextBlock Text="Sign in" FontWeight="SemiBold"/>
                     <TextBlock x:Name="SessionStatusText" TextWrapping="Wrap"
-                               Text="Not signed in — activate with a licence key (hub syncToken). Full email login lands in C2."/>
+                               Text="Not signed in — activate with a licence key (hub syncToken). Suite apps import session.json (C2)."/>
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <TextBox x:Name="LicenseKeyBox" Width="280" PlaceholderText="License key (HLP-…)"
                                  Header="Activate"/>
@@ -58,7 +58,7 @@
                     BorderThickness="1">
                 <StackPanel Spacing="8">
                     <TextBlock Text="Projects" FontWeight="SemiBold"/>
-                    <TextBlock Text="Shared firm catalog — sibling apps resolve the same project ids (C2 deepens sync)."
+                    <TextBlock Text="Shared firm catalog — sibling apps read the same project ids via ConnectCatalog."
                                Opacity="0.7" FontSize="12" TextWrapping="Wrap"/>
                     <TextBox x:Name="NewProjectTitleBox" Header="New project title" PlaceholderText="Project title"/>
                     <StackPanel Orientation="Horizontal" Spacing="8">
@@ -74,9 +74,16 @@
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="Licence" FontWeight="SemiBold"/>
-                    <TextBlock Text="Licence Manager surface — Coming soon (C3). Status via hub activate for now."
-                               Opacity="0.7" TextWrapping="Wrap"/>
+                    <TextBlock Text="Licence Manager" FontWeight="SemiBold"/>
+                    <TextBlock Text="Local seat status for this machine. Operator console (issue / revoke / devices) stays on admin.aorms.in — not Stripe metering."
+                               Opacity="0.7" TextWrapping="Wrap" FontSize="12"/>
+                    <TextBlock x:Name="LicenceStatusText" FontFamily="Consolas" FontSize="12" TextWrapping="Wrap"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="Open License Manager" Click="OpenLicenseManager_Click"/>
+                        <Button Content="Copy install id" Click="CopyInstallId_Click"/>
+                        <Button Content="Export session.json" Click="ExportSession_Click"/>
+                        <Button Content="Clear local licence" Click="ClearLocalLicence_Click"/>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 

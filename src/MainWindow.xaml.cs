@@ -1,8 +1,12 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Human Centric Works, Hospet
+
 using System.Diagnostics;
 using Aorms.Bridge;
 using AormsConnect.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace AormsConnect;
 
@@ -10,6 +14,8 @@ public sealed partial class MainWindow : Window
 {
     readonly AormsBridge _bridge;
     readonly ProjectCatalogStore _catalog = new();
+
+    const string LicenseManagerUrl = "https://admin.aorms.in";
 
     static readonly (string Title, string PackageHint, string Repo)[] SuiteApps =
     [
@@ -62,6 +68,20 @@ public sealed partial class MainWindow : Window
             $"hub={cfg.HubUrl}  hasSyncToken={cfg.HasSyncToken}  syncReady={cfg.SyncReady}";
         if (!string.IsNullOrWhiteSpace(note))
             LogText.Text = note;
+        RefreshLicencePanel();
+    }
+
+    void RefreshLicencePanel()
+    {
+        var snap = _bridge.LicenceSnapshot();
+        LicenceStatusText.Text =
+            $"status={snap.LicenceStatus}  licenseToken={snap.HasLicenseToken}  syncToken={snap.HasSyncToken}\n" +
+            $"installId={snap.InstallId}\n" +
+            $"hub={snap.HubUrl}\n" +
+            $"licenseApi={snap.LicenseApiUrl}\n" +
+            $"sessionFile={(snap.SessionFilePresent ? "yes" : "no")}  updated={snap.UpdatedAt ?? "—"}\n" +
+            $"firm.db={snap.FirmDbPath}\n" +
+            $"session={snap.SessionPath}";
     }
 
     void Refresh_Click(object sender, RoutedEventArgs e) => RefreshSession("Status refreshed.");
@@ -78,17 +98,7 @@ public sealed partial class MainWindow : Window
         {
             LogText.Text = "Activating…";
             var grant = await _bridge.ActivateAsync(key);
-            var cfg = _bridge.HubConfigured();
-            var (sync, hub, installId) = _bridge.Db.ReadAuth();
-            ConnectSession.Write(new ConnectSessionFile
-            {
-                SyncToken = string.IsNullOrWhiteSpace(grant.SyncToken) ? (sync ?? "") : grant.SyncToken,
-                HubUrl = string.IsNullOrWhiteSpace(hub) ? cfg.HubUrl : hub!,
-                LicenseApiUrl = cfg.LicenseApiUrl,
-                LicenseToken = grant.LicenseToken,
-                DeviceId = installId,
-                WrittenAt = DateTimeOffset.UtcNow.ToString("O"),
-            });
+            WriteSessionFromBridge(grant.SyncToken, grant.LicenseToken);
             RefreshSession(
                 $"Activate OK · session.json written · syncToken length={grant.SyncToken.Length}");
         }
@@ -97,6 +107,56 @@ public sealed partial class MainWindow : Window
             RefreshSession($"Activate failed: {ex.Message}");
         }
     }
+
+    void WriteSessionFromBridge(string? syncTokenOverride = null, string? licenseTokenOverride = null)
+    {
+        var snap = _bridge.LicenceSnapshot();
+        var (sync, hub, installId) = _bridge.Db.ReadAuth();
+        var (_, licenseToken, _, _, licenseApi, _, _) = _bridge.Db.ReadLicenceRow();
+        var token = string.IsNullOrWhiteSpace(syncTokenOverride) ? (sync ?? "") : syncTokenOverride!;
+        if (string.IsNullOrWhiteSpace(token))
+            throw new InvalidOperationException("No syncToken to export.");
+        ConnectSession.Write(new ConnectSessionFile
+        {
+            SyncToken = token,
+            HubUrl = string.IsNullOrWhiteSpace(hub) ? snap.HubUrl : hub!,
+            LicenseApiUrl = string.IsNullOrWhiteSpace(licenseApi) ? snap.LicenseApiUrl : licenseApi,
+            LicenseToken = string.IsNullOrWhiteSpace(licenseTokenOverride) ? licenseToken : licenseTokenOverride,
+            DeviceId = installId,
+            WrittenAt = DateTimeOffset.UtcNow.ToString("O"),
+        });
+    }
+
+    void ExportSession_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            WriteSessionFromBridge();
+            RefreshSession("session.json rewritten from firm.db for suite apps.");
+        }
+        catch (Exception ex)
+        {
+            RefreshSession($"Export session failed: {ex.Message}");
+        }
+    }
+
+    void ClearLocalLicence_Click(object sender, RoutedEventArgs e)
+    {
+        _bridge.ClearLocalLicence();
+        RefreshSession("Local licence cleared (firm.db tokens + session.json). Hub revoke is via License Manager.");
+    }
+
+    void CopyInstallId_Click(object sender, RoutedEventArgs e)
+    {
+        var id = _bridge.LicenceSnapshot().InstallId;
+        var data = new DataPackage();
+        data.SetText(id);
+        Clipboard.SetContent(data);
+        RefreshSession($"Copied installId ({id.Length} chars).");
+    }
+
+    void OpenLicenseManager_Click(object sender, RoutedEventArgs e) =>
+        OpenUrl(LicenseManagerUrl);
 
     void OpenDownloads_Click(object sender, RoutedEventArgs e) =>
         OpenUrl("https://aorms.in/downloads");
