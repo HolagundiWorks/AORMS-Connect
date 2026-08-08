@@ -78,15 +78,25 @@ public sealed partial class MainWindow : Window
         {
             LogText.Text = "Activating…";
             var grant = await _bridge.ActivateAsync(key);
-            RefreshSession($"Activate OK · syncToken length={grant.SyncToken?.Length ?? 0}");
+            var cfg = _bridge.HubConfigured();
+            var (sync, hub, installId) = _bridge.Db.ReadAuth();
+            ConnectSession.Write(new ConnectSessionFile
+            {
+                SyncToken = string.IsNullOrWhiteSpace(grant.SyncToken) ? (sync ?? "") : grant.SyncToken,
+                HubUrl = string.IsNullOrWhiteSpace(hub) ? cfg.HubUrl : hub!,
+                LicenseApiUrl = cfg.LicenseApiUrl,
+                LicenseToken = grant.LicenseToken,
+                DeviceId = installId,
+                WrittenAt = DateTimeOffset.UtcNow.ToString("O"),
+            });
+            RefreshSession(
+                $"Activate OK · session.json written · syncToken length={grant.SyncToken.Length}");
         }
         catch (Exception ex)
         {
-            RefreshStatus($"Activate failed: {ex.Message}");
+            RefreshSession($"Activate failed: {ex.Message}");
         }
     }
-
-    void RefreshStatus(string note) => RefreshSession(note);
 
     void OpenDownloads_Click(object sender, RoutedEventArgs e) =>
         OpenUrl("https://aorms.in/downloads");
@@ -94,6 +104,7 @@ public sealed partial class MainWindow : Window
     void OpenSuiteApp_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: string hint }) return;
+        var sessionPath = ConnectSession.DefaultPath();
         var candidates = new[]
         {
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", hint, $"{hint}.exe"),
@@ -103,8 +114,15 @@ public sealed partial class MainWindow : Window
         {
             if (File.Exists(path))
             {
-                Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
-                RefreshSession($"Launched {path}");
+                var args = File.Exists(sessionPath)
+                    ? $"{ConnectSession.FlagConnectSession} \"{sessionPath}\""
+                    : "";
+                Process.Start(new ProcessStartInfo(path)
+                {
+                    UseShellExecute = true,
+                    Arguments = args,
+                });
+                RefreshSession($"Launched {hint} with Connect session");
                 return;
             }
         }
