@@ -13,11 +13,12 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <StackPanel Spacing="4">
                 <TextBlock Text="AORMS Connect" FontSize="28" FontWeight="SemiBold"/>
-                <TextBlock Text="Suite core — sign in once · launch apps · shared projects · installer links"
+                <TextBlock Text="Suite core — sign in once · launch apps · shared projects · DB connector · installer links"
                            Opacity="0.7" TextWrapping="Wrap"/>
             </StackPanel>
 
@@ -44,6 +45,26 @@
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1">
                 <StackPanel Spacing="8">
+                    <TextBlock Text="DB connector" FontWeight="SemiBold"/>
+                    <TextBlock Text="Local firm.db bind + Flush to hub. Web Ops DB Manager (/ops-db) browses what you publish — it does not edit SQLite."
+                               Opacity="0.7" TextWrapping="Wrap" FontSize="12"/>
+                    <TextBlock x:Name="DbConnectorStatusText" FontFamily="Consolas" FontSize="12" TextWrapping="Wrap"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="Enqueue test meta" Click="EnqueueTestMeta_Click"/>
+                        <Button Content="Flush to hub" Click="Flush_Click"
+                                Background="#FF4F18" Foreground="White"/>
+                        <Button Content="Refresh outbox" Click="RefreshOutbox_Click"/>
+                    </StackPanel>
+                    <TextBlock x:Name="DbConnectorLogText" Opacity="0.75" TextWrapping="Wrap"
+                               FontFamily="Consolas" FontSize="12"/>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="3" Padding="16" CornerRadius="8"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1">
+                <StackPanel Spacing="8">
                     <TextBlock Text="Suite apps" FontWeight="SemiBold"/>
                     <TextBlock Text="Open an installed app, or get the installer from aorms.in/downloads (Coming soon until D6)."
                                Opacity="0.7" TextWrapping="Wrap" FontSize="12"/>
@@ -52,7 +73,7 @@
                 </StackPanel>
             </Border>
 
-            <Border Grid.Row="3" Padding="16" CornerRadius="8"
+            <Border Grid.Row="4" Padding="16" CornerRadius="8"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1">
@@ -69,7 +90,7 @@
                 </StackPanel>
             </Border>
 
-            <Border Grid.Row="4" Padding="16" CornerRadius="8"
+            <Border Grid.Row="5" Padding="16" CornerRadius="8"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1">
@@ -87,7 +108,7 @@
                 </StackPanel>
             </Border>
 
-            <TextBlock Grid.Row="5"
+            <TextBlock Grid.Row="6"
                        Text="Package in.aorms.connect · Canon: docs/esti/AORMS-CONNECT.md · Do not fork bbs_engine."
                        Opacity="0.6" TextWrapping="Wrap"/>
         </Grid>

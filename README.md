@@ -12,8 +12,9 @@ catalog, DB connector, and installer links.
 
 ## Status
 
-**C1 shell:** Sign in (hub Activate) · Suite apps Open/Get · local project catalog ·
-Licence stub. Session broker for sibling apps = **C2**.
+**C1–C3 shell:** Sign in (hub Activate) · Suite apps Open/Get · local project catalog ·
+Licence status · **DB connector** (firm.db path · outbox counts · Enqueue test meta · Flush to hub).
+Session/catalog for siblings = **C2**. After Flush, browse published rows on hub `/ops-db`.
 
 ## Develop
 

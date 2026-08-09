@@ -34,6 +34,7 @@ public sealed partial class MainWindow : Window
         _bridge = AormsBridgeHost.CreateFromEnvironment();
         BuildSuiteAppsUi();
         RefreshSession("Ready.");
+        RefreshDbConnector();
         ReloadProjects_Click(this, new RoutedEventArgs());
     }
 
@@ -69,6 +70,60 @@ public sealed partial class MainWindow : Window
         if (!string.IsNullOrWhiteSpace(note))
             LogText.Text = note;
         RefreshLicencePanel();
+        RefreshDbConnector();
+    }
+
+    void RefreshDbConnector(string? note = null)
+    {
+        var cfg = _bridge.HubConfigured();
+        var snap = _bridge.LicenceSnapshot();
+        var box = _bridge.OutboxCounts();
+        DbConnectorStatusText.Text =
+            $"syncReady={cfg.SyncReady}  hub={cfg.HubUrl}\n" +
+            $"firm.db={snap.FirmDbPath}\n" +
+            $"outbox pending meta={box.PendingMeta}  artifacts={box.PendingArtifacts}  total={box.TotalPending}";
+        if (!string.IsNullOrWhiteSpace(note))
+            DbConnectorLogText.Text = note;
+    }
+
+    void RefreshOutbox_Click(object sender, RoutedEventArgs e) =>
+        RefreshDbConnector("Outbox counts refreshed.");
+
+    void EnqueueTestMeta_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var id = Guid.NewGuid().ToString("N")[..12];
+            var rowId = _bridge.EnqueueMeta(
+                "connect.ping",
+                id,
+                new { source = "AORMS-Connect", at = DateTime.UtcNow.ToString("O"), note = "DB connector smoke" });
+            RefreshDbConnector($"Enqueued connect.ping/{id} as meta outbox #{rowId}. Flush to push to hub.");
+        }
+        catch (Exception ex)
+        {
+            RefreshDbConnector($"Enqueue failed: {ex.Message}");
+        }
+    }
+
+    async void Flush_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            DbConnectorLogText.Text = "Flushing…";
+            var result = await _bridge.FlushAsync();
+            if (!string.IsNullOrWhiteSpace(result.SkippedReason))
+            {
+                RefreshDbConnector($"Flush skipped: {result.SkippedReason} (Activate first if missing_sync_token).");
+                return;
+            }
+            RefreshDbConnector(
+                $"Flush OK · metaSent={result.MetaSent}  artifactsSent={result.ArtifactsSent}. Browse on hub /ops-db.");
+        }
+        catch (Exception ex)
+        {
+            RefreshDbConnector($"Flush failed: {ex.Message}");
+        }
     }
 
     void RefreshLicencePanel()
