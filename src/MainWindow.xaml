@@ -4,113 +4,284 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="AORMS Connect">
 
-    <ScrollViewer>
-        <Grid Padding="24" RowSpacing="16">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+    <!--
+      Manager Hub (AORMS Connect) — DESKTOP-WINUI-UX thin+dock:
+      MenuBar · ribbon 56 · stage · ActionDock ≤3 · taskbar 60 · density 1×
+    -->
+    <Grid Background="{StaticResource HcwFogBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-            <StackPanel Spacing="4">
-                <TextBlock Text="AORMS Connect" FontSize="28" FontWeight="SemiBold"/>
-                <TextBlock Text="Suite core — sign in once · launch apps · shared projects · DB connector · installer links"
-                           Opacity="0.7" TextWrapping="Wrap"/>
-            </StackPanel>
+        <!-- MenuBar row — dedicated strip -->
+        <Border Grid.Row="0" Margin="16,12,16,0" Padding="8,0" Height="36"
+                Background="{StaticResource HcwWhiteBrush}"
+                BorderBrush="{StaticResource HcwEdgeBrush}"
+                BorderThickness="1" CornerRadius="8"
+                AutomationProperties.Name="Menu bar">
+            <MenuBar Height="32" VerticalAlignment="Center"
+                     Background="Transparent"
+                     Foreground="{StaticResource HcwInkBrush}">
+                <MenuBarItem Title="File" AccessKey="F">
+                    <MenuFlyoutItem Text="Refresh status" Click="Refresh_Click"/>
+                    <MenuFlyoutSeparator/>
+                    <MenuFlyoutItem Text="Exit" Click="Exit_Click" AccessKey="X"/>
+                </MenuBarItem>
+                <MenuBarItem Title="Help" AccessKey="H">
+                    <MenuFlyoutItem Text="About AORMS Connect" Click="About_Click"/>
+                    <MenuFlyoutItem Text="Open suite canon…" Click="OpenCanon_Click"/>
+                </MenuBarItem>
+            </MenuBar>
+        </Border>
 
-            <Border Grid.Row="1" Padding="16" CornerRadius="8"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1">
-                <StackPanel Spacing="8">
-                    <TextBlock Text="Sign in" FontWeight="SemiBold"/>
-                    <TextBlock x:Name="SessionStatusText" TextWrapping="Wrap"
-                               Text="Not signed in — activate with a licence key (hub syncToken). Suite apps import session.json (C2)."/>
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <TextBox x:Name="LicenseKeyBox" Width="280" PlaceholderText="License key (HLP-…)"
-                                 Header="Activate"/>
-                        <Button Content="Activate" Click="Activate_Click" VerticalAlignment="Bottom"/>
-                        <Button Content="Refresh" Click="Refresh_Click" VerticalAlignment="Bottom"/>
+        <!-- Ribbon 56 — brand once · sync chip · Local AI -->
+        <Grid Grid.Row="1" Height="56" Margin="16,8,16,8">
+            <Border CornerRadius="8" Background="{StaticResource HcwNeuDarkBrush}" Margin="6,6,0,0"/>
+            <Border CornerRadius="8" Background="{StaticResource HcwNeuLightBrush}" Margin="0,0,6,6"/>
+            <Border CornerRadius="8" Background="{StaticResource HcwSoftBrush}">
+                <Grid Padding="16,0" Height="56">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                        <TextBlock Text="AORMS Connect" FontSize="16" FontWeight="SemiBold"
+                                   Foreground="{StaticResource HcwInkBrush}"
+                                   FontFamily="{StaticResource HcwFontFamily}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="Manager Hub" Style="{StaticResource HcwLabel}"
+                                   VerticalAlignment="Center"/>
                     </StackPanel>
-                    <TextBlock x:Name="LogText" Opacity="0.7" TextWrapping="Wrap" FontFamily="Consolas" FontSize="12"/>
-                </StackPanel>
+                    <Border Grid.Column="1" HorizontalAlignment="Left" Margin="24,0,0,0"
+                            Padding="12,0" Height="35" CornerRadius="8"
+                            Background="{StaticResource HcwFogBrush}" VerticalAlignment="Center"
+                            Tapped="SyncChip_Tapped"
+                            ToolTipService.ToolTip="Hub sync status">
+                        <TextBlock x:Name="SyncChipText" Text="Sync…" VerticalAlignment="Center"
+                                   FontSize="12" Foreground="{StaticResource HcwInkBrush}"
+                                   MaxWidth="360" TextTrimming="CharacterEllipsis"/>
+                    </Border>
+                    <Grid Grid.Column="2" Height="35" VerticalAlignment="Center">
+                        <Border CornerRadius="8" Background="{StaticResource HcwNeuDarkBrush}" Margin="3,3,0,0"/>
+                        <Border CornerRadius="8" Background="{StaticResource HcwNeuLightBrush}" Margin="0,0,3,3"/>
+                        <Border CornerRadius="8" Background="{StaticResource HcwSoftBrush}" Padding="10,0">
+                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <FontIcon Glyph="&#xE99A;" FontSize="14" Foreground="{StaticResource HcwAccentBrush}"/>
+                                <TextBlock Text="Local AI · desktop" Style="{StaticResource HcwLabel}"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
             </Border>
-
-            <Border Grid.Row="2" Padding="16" CornerRadius="8"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1">
-                <StackPanel Spacing="8">
-                    <TextBlock Text="DB connector" FontWeight="SemiBold"/>
-                    <TextBlock Text="Local firm.db bind + Flush to hub. Web Ops DB Manager (/ops-db) browses what you publish — it does not edit SQLite."
-                               Opacity="0.7" TextWrapping="Wrap" FontSize="12"/>
-                    <TextBlock x:Name="DbConnectorStatusText" FontFamily="Consolas" FontSize="12" TextWrapping="Wrap"/>
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button Content="Enqueue test meta" Click="EnqueueTestMeta_Click"/>
-                        <Button Content="Flush to hub" Click="Flush_Click"
-                                Background="#FF4F18" Foreground="White"/>
-                        <Button Content="Refresh outbox" Click="RefreshOutbox_Click"/>
-                    </StackPanel>
-                    <TextBlock x:Name="DbConnectorLogText" Opacity="0.75" TextWrapping="Wrap"
-                               FontFamily="Consolas" FontSize="12"/>
-                </StackPanel>
-            </Border>
-
-            <Border Grid.Row="3" Padding="16" CornerRadius="8"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1">
-                <StackPanel Spacing="8">
-                    <TextBlock Text="Suite apps" FontWeight="SemiBold"/>
-                    <TextBlock Text="Open an installed app, or get the installer from aorms.in/downloads (Coming soon until D6)."
-                               Opacity="0.7" TextWrapping="Wrap" FontSize="12"/>
-                    <ItemsControl x:Name="SuiteAppsList"/>
-                    <Button Content="Open downloads portal" Click="OpenDownloads_Click"/>
-                </StackPanel>
-            </Border>
-
-            <Border Grid.Row="4" Padding="16" CornerRadius="8"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1">
-                <StackPanel Spacing="8">
-                    <TextBlock Text="Projects" FontWeight="SemiBold"/>
-                    <TextBlock Text="Shared firm catalog — sibling apps read the same project ids via ConnectCatalog."
-                               Opacity="0.7" FontSize="12" TextWrapping="Wrap"/>
-                    <TextBox x:Name="NewProjectTitleBox" Header="New project title" PlaceholderText="Project title"/>
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button Content="Add local" Click="AddProject_Click"/>
-                        <Button Content="Reload" Click="ReloadProjects_Click"/>
-                    </StackPanel>
-                    <TextBlock x:Name="ProjectListText" FontFamily="Consolas" FontSize="12" TextWrapping="Wrap"/>
-                </StackPanel>
-            </Border>
-
-            <Border Grid.Row="5" Padding="16" CornerRadius="8"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1">
-                <StackPanel Spacing="8">
-                    <TextBlock Text="Licence Manager" FontWeight="SemiBold"/>
-                    <TextBlock Text="Local seat status for this machine. Operator console (issue / revoke / devices) stays on admin.aorms.in — not Stripe metering."
-                               Opacity="0.7" TextWrapping="Wrap" FontSize="12"/>
-                    <TextBlock x:Name="LicenceStatusText" FontFamily="Consolas" FontSize="12" TextWrapping="Wrap"/>
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button Content="Open License Manager" Click="OpenLicenseManager_Click"/>
-                        <Button Content="Copy install id" Click="CopyInstallId_Click"/>
-                        <Button Content="Export session.json" Click="ExportSession_Click"/>
-                        <Button Content="Clear local licence" Click="ClearLocalLicence_Click"/>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-
-            <TextBlock Grid.Row="6"
-                       Text="Package in.aorms.connect · Canon: docs/esti/AORMS-CONNECT.md · Do not fork bbs_engine."
-                       Opacity="0.6" TextWrapping="Wrap"/>
         </Grid>
-    </ScrollViewer>
+
+        <!-- Stage + dock + taskbar -->
+        <Grid Grid.Row="2">
+            <ScrollViewer Background="{StaticResource HcwFogBrush}"
+                          Padding="24,8,24,168"
+                          VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="16" MaxWidth="1100" HorizontalAlignment="Stretch">
+
+                    <!-- Managers -->
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Managers" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{StaticResource HcwInkBrush}"
+                                   FontFamily="{StaticResource HcwFontFamily}"/>
+                        <TextBlock Text="Practice apps — launch with Connect session (no per-app login)."
+                                   Style="{StaticResource HcwBodyMuted}" FontSize="12"/>
+                        <ItemsControl x:Name="ManagersList">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="12"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <!-- Technical -->
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Technical" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{StaticResource HcwInkBrush}"
+                                   FontFamily="{StaticResource HcwFontFamily}"/>
+                        <TextBlock Text="Quantity · BBS · programme — AQC Core is the full technical host."
+                                   Style="{StaticResource HcwBodyMuted}" FontSize="12"/>
+                        <ItemsControl x:Name="TechnicalList">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="12"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <!-- Drafting -->
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Drafting" FontSize="15" FontWeight="SemiBold"
+                                   Foreground="{StaticResource HcwInkBrush}"
+                                   FontFamily="{StaticResource HcwFontFamily}"/>
+                        <ItemsControl x:Name="DraftingList">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="12"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <!-- Projects catalog -->
+                    <Border Style="{StaticResource HcwFlatCard}">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Projects" FontWeight="SemiBold"
+                                       Foreground="{StaticResource HcwInkBrush}"
+                                       FontFamily="{StaticResource HcwFontFamily}"/>
+                            <TextBlock Text="Shared firm catalog — sibling apps bind to these UUIDs via ConnectCatalog."
+                                       Style="{StaticResource HcwBodyMuted}" FontSize="12"/>
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="NewProjectTitleBox" Header="New project title"
+                                         PlaceholderText="e.g. Residential block A"/>
+                                <Button Grid.Column="1" Content="Add" Click="AddProject_Click"
+                                        Style="{StaticResource HcwGhostButton}"
+                                        VerticalAlignment="Bottom"/>
+                                <Button Grid.Column="2" Content="Reload" Click="ReloadProjects_Click"
+                                        Style="{StaticResource HcwGhostButton}"
+                                        VerticalAlignment="Bottom"/>
+                            </Grid>
+                            <ListView x:Name="ProjectListView" MinHeight="120" MaxHeight="220"
+                                      SelectionMode="Single"
+                                      Style="{StaticResource HcwStageList}">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnSpacing="12" Padding="4,2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="88"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="72"/>
+                                                <ColumnDefinition Width="100"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Text="{Binding Ref}" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource HcwInkBrush}"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Title}"
+                                                       TextTrimming="CharacterEllipsis"/>
+                                            <TextBlock Grid.Column="2" Text="{Binding Status}"
+                                                       Foreground="{StaticResource HcwMutedBrush}"/>
+                                            <TextBlock Grid.Column="3" Text="{Binding IdShort}"
+                                                       FontFamily="Consolas" FontSize="11"
+                                                       Foreground="{StaticResource HcwMutedBrush}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                            <TextBlock x:Name="ProjectEmptyText" Visibility="Collapsed"
+                                       Style="{StaticResource HcwBodyMuted}" FontSize="12"
+                                       Text="No projects yet — add a title above."/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Account & hub -->
+                    <Border Style="{StaticResource HcwFlatCard}">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Account &amp; hub" FontWeight="SemiBold"
+                                       Foreground="{StaticResource HcwInkBrush}"
+                                       FontFamily="{StaticResource HcwFontFamily}"/>
+                            <TextBlock x:Name="SessionStatusText" TextWrapping="Wrap"
+                                       Foreground="{StaticResource HcwInkBrush}" FontSize="12"
+                                       Text="Not signed in — activate with a licence key."/>
+                            <TextBlock Text="Suite apps read licence from session.json after Activate — do not Activate in AStudio / AConsulting / AQC."
+                                       Style="{StaticResource HcwBodyMuted}" FontSize="12" TextWrapping="Wrap"/>
+                            <TextBox x:Name="LicenseKeyBox" Width="320" PlaceholderText="License key (HLP-…)"
+                                     Header="Activate (suite-wide)" HorizontalAlignment="Left"/>
+                            <TextBlock x:Name="LogText" Opacity="0.7" TextWrapping="Wrap"
+                                       FontFamily="Consolas" FontSize="12"/>
+                            <TextBlock x:Name="LicenceStatusText" FontFamily="Consolas" FontSize="11"
+                                       TextWrapping="Wrap" Foreground="{StaticResource HcwMutedBrush}"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="License Manager" Click="OpenLicenseManager_Click"
+                                        Style="{StaticResource HcwGhostButton}"/>
+                                <Button Content="Export session.json" Click="ExportSession_Click"
+                                        Style="{StaticResource HcwGhostButton}"/>
+                                <Button Content="Clear local licence" Click="ClearLocalLicence_Click"
+                                        Style="{StaticResource HcwGhostButton}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- DB connector (progressive) -->
+                    <Expander Header="DB connector · firm.db outbox" IsExpanded="False"
+                              HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                        <StackPanel Spacing="8" Padding="0,8,0,0">
+                            <TextBlock Text="Local firm.db bind + Flush to hub. Web Ops (/ops-db) browses published rows — it does not edit SQLite."
+                                       Style="{StaticResource HcwBodyMuted}" FontSize="12" TextWrapping="Wrap"/>
+                            <TextBlock x:Name="DbConnectorStatusText" FontFamily="Consolas" FontSize="12" TextWrapping="Wrap"/>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button Content="Enqueue test meta" Click="EnqueueTestMeta_Click"
+                                        Style="{StaticResource HcwGhostButton}"/>
+                                <Button Content="Refresh outbox" Click="RefreshOutbox_Click"
+                                        Style="{StaticResource HcwGhostButton}"/>
+                            </StackPanel>
+                            <TextBlock x:Name="DbConnectorLogText" Opacity="0.75" TextWrapping="Wrap"
+                                       FontFamily="Consolas" FontSize="12"/>
+                        </StackPanel>
+                    </Expander>
+
+                    <TextBlock Text="Package in.aorms.connect · Suite core Manager Hub — not a practice manager."
+                               Style="{StaticResource HcwLabel}" TextWrapping="Wrap"/>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- ActionDock — Add project · Flush · Activate -->
+            <Grid x:Name="DockChrome" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                  Margin="16,0,16,84" Canvas.ZIndex="50">
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuDarkBrush}" Margin="5,5,0,0"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuLightBrush}" Margin="0,0,5,5"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwSoftBrush}" Padding="10,8">
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button Content="Add project" Style="{StaticResource HcwDockButton}"
+                                Click="AddProject_Click"
+                                ToolTipService.ToolTip="Add project to Connect catalog"/>
+                        <Button Content="Flush" Style="{StaticResource HcwDockPrimary}"
+                                Click="Flush_Click" MinWidth="88"
+                                ToolTipService.ToolTip="Flush meta/artifact outbox to hub"/>
+                        <Button Content="Activate" Style="{StaticResource HcwDockButton}"
+                                Click="Activate_Click"
+                                ToolTipService.ToolTip="Activate licence · write session.json"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Taskbar 60 -->
+            <Grid VerticalAlignment="Bottom" Margin="16,0,16,16" Height="60" Canvas.ZIndex="40">
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuDarkBrush}" Margin="6,6,0,0"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwNeuLightBrush}" Margin="0,0,6,6"/>
+                <Border CornerRadius="8" Background="{StaticResource HcwSoftBrush}" Padding="12,0">
+                    <Grid Height="60">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="TrayHintText" Text="Sign in once · launch managers · share catalog"
+                                   Style="{StaticResource HcwLabel}" VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                                    VerticalAlignment="Center">
+                            <Button Content="Downloads" Click="OpenDownloads_Click"
+                                    Style="{StaticResource HcwGhostButton}"
+                                    ToolTipService.ToolTip="aorms.in/downloads (Coming soon until D6)"/>
+                            <Button Content="Refresh outbox" Click="RefreshOutbox_Click"
+                                    Style="{StaticResource HcwGhostButton}"/>
+                            <Button Content="Copy install id" Click="CopyInstallId_Click"
+                                    Style="{StaticResource HcwGhostButton}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
 </Window>
